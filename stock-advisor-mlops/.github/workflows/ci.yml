@@ -1,0 +1,69 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: 1.8.2
+
+      - name: Configure Poetry and Install Dependencies
+        run: |
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-root
+
+      - name: Run pre-commit checks
+        run: |
+          pre-commit run --all-files
+
+      - name: Run pytest
+        run: |
+          pytest
+
+      - name: Log in to Docker Hub
+        if: success() && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Airflow Image
+        if: success() && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/airflow
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/airflow:latest
+
+      - name: Build and Push MLflow Image
+        if: success() && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/mlflow
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlflow:latest
+
+      - name: Build and Push Streamlit Image
+        if: success() && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/streamlit
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
