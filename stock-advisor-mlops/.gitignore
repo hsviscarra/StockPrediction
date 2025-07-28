@@ -1,0 +1,6 @@
+services/airflow/data/mlflow_artifacts/
+services/airflow/data/mlflow_artifacts/
+services/airflow/data/mlflow_artifacts/
+notebooks
+.env
+.env
