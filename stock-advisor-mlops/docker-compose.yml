@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: airflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  airflow:
+    build:
+      context: ./services/airflow
+      dockerfile: Dockerfile
+    container_name: airflow
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./services/airflow/dags:/opt/airflow/dags
+      - ./src:/app/src
+      - ./services/airflow/data:/opt/airflow/data 
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI} 
+      PYTHONPATH: /app
+    command: webserver
+    depends_on:
+      - postgres
+      - mlflow
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    env_file:
+      - .env
+
+  airflow-scheduler:
+    build:
+      context: ./services/airflow
+      dockerfile: Dockerfile
+    container_name: airflow-scheduler
+    volumes:
+      - ./services/airflow/dags:/opt/airflow/dags
+      - ./src:/app/src
+      - ./services/airflow/data:/opt/airflow/data
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      PYTHONPATH: /app
+    depends_on:
+      - postgres
+    command: airflow scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  mlflow:
+    build:
+      context: ./services/mlflow
+      dockerfile: Dockerfile
+    container_name: mlflow
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./mlflow_data:/mlflow_data
+      - ./artifacts:/mlflow/artifacts
+    environment:
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+      MLFLOW_BACKEND_STORE_URI: sqlite:////mlflow_data/mlflow.db
+    entrypoint: ["/entrypoint.sh"]
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  streamlit:
+    build:
+      context: ./services/streamlit
+      dockerfile: Dockerfile
+    container_name: streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./services/streamlit:/app
+    depends_on:
+      - mlflow
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+volumes:
+  postgres_data:

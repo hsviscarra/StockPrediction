@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -30,12 +30,10 @@ jobs:
           poetry install --no-interaction --no-root
 
       - name: Run pre-commit checks
-        run: |
-          pre-commit run --all-files
+        run: pre-commit run --all-files
 
-      - name: Run pytest
-        run: |
-          pytest
+      - name: Run tests
+        run: pytest
 
       - name: Log in to Docker Hub
         if: success() && github.ref == 'refs/heads/main'
@@ -44,7 +42,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Airflow Image
+      - name: Build & Push Airflow Image
         if: success() && github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
@@ -52,7 +50,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/airflow:latest
 
-      - name: Build and Push MLflow Image
+      - name: Build & Push MLflow Image
         if: success() && github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
@@ -60,10 +58,25 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlflow:latest
 
-      - name: Build and Push Streamlit Image
+      - name: Build & Push Streamlit Image
         if: success() && github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v5
         with:
           context: ./services/streamlit
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
+
+      - name: Azure Login
+        if: success() && github.ref == 'refs/heads/main'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        if: success() && github.ref == 'refs/heads/main'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: 'production'
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
+  
