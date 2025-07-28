@@ -13,6 +13,15 @@ Stock prediction is a long-standing challenge that combines quantitative modelin
 - Enable long-term and short-term investment decision support.
 - Deliver predictions via a production-grade pipeline.
 
+The scope of the project is the following:
+- Market: US Market
+- Benchmark SP500 Index: ticket VOO
+- Macroeconomic indicators: GDP, Inflation to assess how it affects the US market and stock prediction
+- Dataset size: 5 tickets for tech companies in the US for the last 25 years
+
+For future efforst we consider including fundamental data and financial reporting data for SEC fillings
+
+
 **Why this matters:**
 
 - Helps retail and institutional investors make informed decisions.
@@ -166,3 +175,33 @@ This project is licensed under the MIT License.
 	•	MLflow Docs
 	•	Evidently AI
 	•	Terraform AWS Provider
+
+
+
+  # --For airflow
+  # docker build -t airflow .
+
+  # docker run -d \
+  # --name airflow \
+  # -p 8080:8080 \
+  # -v $(pwd)/dags:/opt/airflow/dags \
+  # -v $(pwd)/data:/opt/airflow/data \
+  # airflow
+
+#AIRFLOW
+#docker run -d   --name airflow   -p 8080:8080   -v $(pwd)/dags:/opt/airflow/dags   -v $(pwd)/data:/opt/airflow/data   airflow
+
+#MLFLOW
+#docker build -t mlflow-local .
+# docker run -p 5000:5000 \
+#   -v $(pwd)/mlflow.db:/mlflow.db \
+#   -v $(pwd)/artifacts:/mlflow/artifacts \
+#   mlflow-local
+
+
+# make build        # Builds all services
+# make up           # Starts everything in background
+# make logs         # Watch logs
+# make test-mlflow  # Trigger test MLflow run
+# make down         # Stop services
+# make clean        # Stop + remove volumes# Trigger CI
