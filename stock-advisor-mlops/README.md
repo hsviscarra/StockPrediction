@@ -204,4 +204,4 @@ This project is licensed under the MIT License.
 # make logs         # Watch logs
 # make test-mlflow  # Trigger test MLflow run
 # make down         # Stop services
-# make clean        # Stop + remove volumes
+# make clean        # Stop + remove volumes# Trigger CI
