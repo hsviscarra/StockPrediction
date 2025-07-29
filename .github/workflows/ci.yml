@@ -36,7 +36,7 @@ jobs:
         run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
       
       - name: Run tests
-        run: pytest --maxfail=1 --disable-warnings || true
+        run: pytest --maxfail=1 --disable-warnings
         env:
           MLFLOW_TRACKING_URI: dummy
           CI: true

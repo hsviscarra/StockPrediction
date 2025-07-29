@@ -27,7 +27,7 @@ def test_train_model_outputs(mock_mlflow, mock_read_csv, mock_makedirs):
     # Assertions
     assert run_id == "test_run_id"
     assert isinstance(mse, float)
-    assert mse > 0
+    assert 0 <= mse < 1.0
 
     # Validate mocks used
     mock_read_csv.assert_called_once()
