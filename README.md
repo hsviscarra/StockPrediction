@@ -15,11 +15,18 @@ Stock prediction is a long-standing challenge that combines quantitative modelin
 
 The scope of the project is the following:
 - Market: US Market
-- Benchmark SP500 Index: ticket VOO
-- Macroeconomic indicators: GDP, Inflation to assess how it affects the US market and stock prediction
-- Dataset size: 5 tickets for tech companies in the US for the last 25 years
+- Benchmark SP500 Index
 
-For future efforst we consider including fundamental data and financial reporting data for SEC fillings
+The purpose is to make a prediction of the SP500 for the next 5 days using a comprehensive mlops project uses the following services:
+- Apache airflow for orchestration
+- MLFlow to track experiments and models
+- Streamlit to expose the last prediction.
+- Evidently to monitor the model and data
+- FastAPI as the backend
+- Terraform to automate the creation of App Service in Azure to host the production code
+- Pytest to introduce tests in the CI/CD flow process
+
+This project shows how to build a MLOPs infrastruvture for a specific task and it is easily extensible for more complex jobs. 
 
 
 **Why this matters:**
@@ -30,28 +37,19 @@ For future efforst we consider including fundamental data and financial reportin
 
 ---
 
-## ☁️ 2. Cloud Architecture (AWS)
+## ☁️ 2. Cloud Architecture (Azure)
 
 The project is cloud-ready and leverages AWS services such as:
 
-- **S3**: Raw & processed data storage
-- **ECR**: Container image registry
-- **ECS / EKS**: Model & pipeline deployment (Docker/Kubernetes)
-- **CloudWatch**: Monitoring & logging
-- **SageMaker (optional)**: Alternative for training/deploying ML models
+- **AppService**: To host the production code and application
 
-The entire project is containerized and deployable using **Docker or Kubernetes**.
+The entire project is containerized and deployable using **Docker**.
 
 ---
 
 ## 🛠️ 3. Infrastructure as Code (IaC)
 
 All infrastructure is provisioned via **Terraform**, enabling reproducible environments.
-
-- `terraform/`
-  - `main.tf`: Main configuration
-  - `modules/`: Reusable infrastructure modules (S3, EKS, IAM roles, etc.)
-  - `backend.tf`: Remote state management (e.g., S3 + DynamoDB)
 
 ---
 
@@ -72,20 +70,17 @@ All infrastructure is provisioned via **Terraform**, enabling reproducible envir
   - Daily data ingestion from Yahoo Finance
   - Feature engineering pipelines
   - Model training, evaluation, and deployment
-  - Conditional tasks (e.g., retraining if performance degrades)
 
 ---
 
 ## 🚀 6. Model Deployment
 
 - Model is served using:
-  - **FastAPI** or **Flask** (RESTful API)
+  - **FastAPI**  (RESTful API)
   - Dockerized container
-  - Deployed via ECS, EKS, or on-premise Kubernetes
+  - Deployed via Docker
   - CI/CD pipeline ensures automatic deployments
 
-Optional tools:
-- **SageMaker** or **AWS Lambda** for model inference
 
 ---
 
@@ -95,7 +90,7 @@ Optional tools:
   - Data drift
   - Prediction drift
   - Feature importance changes
-- **Alerts** via:
+- **Alerts** (to be implemented) via:
   - Slack/Email notifications
   - Airflow-triggered retraining workflows
   - Auto-switching to backup models (blue/green deployment)
@@ -115,11 +110,11 @@ Optional tools:
 
 | Area              | Tools / Techniques                                      |
 |-------------------|----------------------------------------------------------|
-| Unit Testing      | `pytest` + `unittest`                                    |
+| Unit Testing      | `pytest`                              |
 | Integration Tests | End-to-end tests for data flow and predictions           |
 | Code Formatting   | `black`, `isort`, `flake8`, `pylint`                     |
 | Pre-commit Hooks  | Auto-formatting, linting, and secret scanning            |
-| CI/CD             | GitHub Actions / GitLab CI to test, build, and deploy    |
+| CI/CD             | GitHub Actions |
 | Project Structure | Modular folder structure with clear separation of concerns |
 | Makefile          | Reusable command recipes (e.g., `make train`, `make test`) |
 
@@ -127,17 +122,20 @@ Optional tools:
 
 ## 🧾 Project Structure
 .
-├── airflow/                    # DAGs and orchestration scripts
-├── data/                       # Raw and processed datasets
-├── docker/                     # Dockerfiles and deployment configs
-├── mlflow/                     # MLflow tracking and registry setup
-├── models/                     # Saved models and training scripts
+├── .github/                    # DAGs and orchestration scripts
+├── artifacts/                       # Raw and processed datasets
+├── configs/                     # Dockerfiles and deployment configs
+├── data/                     # MLflow tracking and registry setup
+├── docs/                     # Saved models and training scripts
 ├── notebooks/                  # Exploratory analysis and prototyping
+├── services/                  # All the services used for the project
 ├── src/                        # Source code (training, ETL, API)
 ├── terraform/                 # IaC scripts
 ├── tests/                      # Unit and integration tests
 ├── Makefile                    # Command recipes
-├── requirements.txt
+├── Docker Compose              # Command recipes
+├── poetry.lock
+├── poetry.toml
 ├── environment.yml
 └── README.md
 
@@ -156,11 +154,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Start services
-docker-compose up
-
-# Run pipeline
-make airflow-init
-make run-dag
+make up
 
 📬 Contributing
 
@@ -177,31 +171,4 @@ This project is licensed under the MIT License.
 	•	Terraform AWS Provider
 
 
-
-  # --For airflow
-  # docker build -t airflow .
-
-  # docker run -d \
-  # --name airflow \
-  # -p 8080:8080 \
-  # -v $(pwd)/dags:/opt/airflow/dags \
-  # -v $(pwd)/data:/opt/airflow/data \
-  # airflow
-
-#AIRFLOW
-#docker run -d   --name airflow   -p 8080:8080   -v $(pwd)/dags:/opt/airflow/dags   -v $(pwd)/data:/opt/airflow/data   airflow
-
-#MLFLOW
-#docker build -t mlflow-local .
-# docker run -p 5000:5000 \
-#   -v $(pwd)/mlflow.db:/mlflow.db \
-#   -v $(pwd)/artifacts:/mlflow/artifacts \
-#   mlflow-local
-
-
-# make build        # Builds all services
-# make up           # Starts everything in background
-# make logs         # Watch logs
-# make test-mlflow  # Trigger test MLflow run
-# make down         # Stop services
-# make clean        # Stop + remove volumes# Trigger CI
+  
