@@ -27,7 +27,7 @@ jobs:
       - name: Configure Poetry and Install Dependencies
         run: |
           poetry config virtualenvs.create false
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction --no-root --with dev
 
       - name: Run pre-commit checks
         run: pre-commit run --all-files
