@@ -38,6 +38,7 @@ jobs:
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings
         env:
+          PYTHONPATH: services:src
           MLFLOW_TRACKING_URI: dummy
           CI: true
 
