@@ -35,12 +35,21 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
       
+      - name: Set up Airflow DB
+        run: |
+          mkdir -p ~/airflow
+          echo "AIRFLOW_HOME=$HOME/airflow" >> $GITHUB_ENV
+          echo "AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:///$HOME/airflow/airflow.db" >> $GITHUB_ENV
+          airflow db init
+      
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings
         env:
           PYTHONPATH: services:src
           MLFLOW_TRACKING_URI: dummy
           CI: true
+          AIRFLOW_HOME: ${{ env.HOME }}/airflow
+          AIRFLOW__CORE__SQL_ALCHEMY_CONN: sqlite://${{ env.HOME }}/airflow/airflow.db
 
       - name: Log in to Docker Hub
         if: success() && github.ref == 'refs/heads/main'
