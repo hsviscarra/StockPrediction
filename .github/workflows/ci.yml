@@ -40,7 +40,7 @@ jobs:
           mkdir -p ~/airflow
           echo "AIRFLOW_HOME=$HOME/airflow" >> $GITHUB_ENV
           echo "AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:///$HOME/airflow/airflow.db" >> $GITHUB_ENV
-          airflow db init
+          airflow db migrate
       
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings
