@@ -25,7 +25,7 @@ with DAG(
     dag_id="sp500_data_ingestion_dag",
     default_args=default_args,
     start_date=datetime(2024, 1, 1),
-    schedule_interval="@daily",
+    schedule="@daily",
     catchup=False,
     tags=["ingestion", "sp500"],
 ) as dag:

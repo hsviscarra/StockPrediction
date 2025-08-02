@@ -25,7 +25,7 @@ with DAG(
     dag_id="fetch_gdppot_data",
     default_args=default_args,
     start_date=datetime(2024, 1, 1),
-    schedule_interval="@daily",
+    schedule="@daily",
     catchup=False,
     tags=["fred", "economic-data"],
 ) as dag:

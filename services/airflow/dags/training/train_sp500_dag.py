@@ -42,7 +42,7 @@ with DAG(
     dag_id="train_and_promote_sp500_dag",
     default_args=default_args,
     start_date=datetime(2024, 1, 1),
-    schedule_interval="@daily",
+    schedule="@daily",
     catchup=False,
     tags=["training", "sp500"],
 ) as dag:
