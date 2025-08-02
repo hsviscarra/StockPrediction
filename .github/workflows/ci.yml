@@ -37,9 +37,11 @@ jobs:
       
       - name: Set up Airflow DB
         run: |
-          mkdir -p ~/airflow
-          echo "AIRFLOW_HOME=$HOME/airflow" >> $GITHUB_ENV
-          echo "AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:///$HOME/airflow/airflow.db" >> $GITHUB_ENV
+          export AIRFLOW_HOME="$HOME/airflow"
+          export AIRFLOW__CORE__SQL_ALCHEMY_CONN="sqlite:///$AIRFLOW_HOME/airflow.db"
+          mkdir -p "$AIRFLOW_HOME"
+          echo "AIRFLOW_HOME=$AIRFLOW_HOME" >> $GITHUB_ENV
+          echo "AIRFLOW__CORE__SQL_ALCHEMY_CONN=$AIRFLOW__CORE__SQL_ALCHEMY_CONN" >> $GITHUB_ENV
           airflow db migrate
       
       - name: Run tests
@@ -48,8 +50,6 @@ jobs:
           PYTHONPATH: services:src
           MLFLOW_TRACKING_URI: dummy
           CI: true
-          AIRFLOW_HOME: ${{ env.HOME }}/airflow
-          AIRFLOW__CORE__SQL_ALCHEMY_CONN: sqlite://${{ env.HOME }}/airflow/airflow.db
 
       - name: Log in to Docker Hub
         if: success() && github.ref == 'refs/heads/main'
