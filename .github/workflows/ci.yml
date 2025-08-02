@@ -45,7 +45,7 @@ jobs:
           airflow db migrate
       
       - name: Run tests
-        run: 
+        run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/services/api:$(pwd)/src
           pytest --maxfail=1 --disable-warnings
         env:
