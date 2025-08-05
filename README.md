@@ -1,6 +1,6 @@
 # 🧠 Stock Prediction & Fundamental Analysis Platform
 
-A robust, scalable, and cloud-native pipeline for predicting stock prices and analyzing financial fundamentals using **free data sources like Yahoo Finance**. This project integrates the best MLOps and data engineering practices for research, deployment, and monitoring.
+A robust, scalable, and cloud-native pipeline for analyzing stock prices using **free data sources like Yahoo Finance**. This project integrates MLOps and data engineering practices for research, deployment, and monitoring.
 
 ---
 
@@ -8,16 +8,17 @@ A robust, scalable, and cloud-native pipeline for predicting stock prices and an
 
 Stock prediction is a long-standing challenge that combines quantitative modeling, macroeconomic insights, and technical analysis. This project aims to:
 
-- Predict future stock prices using machine learning.
-- Analyze companies based on fundamental indicators (e.g., P/E ratio, EPS, ROE).
-- Enable long-term and short-term investment decision support.
-- Deliver predictions via a production-grade pipeline.
+- Predict future stock prices using machine learning 
+- Analyze companies based on fundamental indicators (e.g., P/E ratio, EPS, ROE) (TBD)
+- Enable long-term and short-term investment decision support (TBD)
+- Deliver predictions via a production-grade pipeline (TBD)
 
-The scope of the project is the following:
+For now, and to show the architecture of the mlops infrastructure the scope of the project is the following:
 - Market: US Market
-- Benchmark SP500 Index
+- Ticket: SP500 Index
+- prediction of the SP500 for the next 5 days 
 
-The purpose is to make a prediction of the SP500 for the next 5 days using a comprehensive mlops project uses the following services:
+The following services were implemented for this project:
 - Apache airflow for orchestration
 - MLFlow to track experiments and models
 - Streamlit to expose the last prediction.
@@ -39,7 +40,7 @@ This project shows how to build a MLOPs infrastruvture for a specific task and i
 
 ## ☁️ 2. Cloud Architecture (Azure)
 
-The project is cloud-ready and leverages AWS services such as:
+The project is cloud-ready and leverages Azure services such as:
 
 - **AppService**: To host the production code and application
 
@@ -49,7 +50,7 @@ The entire project is containerized and deployable using **Docker**.
 
 ## 🛠️ 3. Infrastructure as Code (IaC)
 
-All infrastructure is provisioned via **Terraform**, enabling reproducible environments.
+Infrastructure could be provisioned via **Terraform**, enabling reproducible environments.
 
 ---
 

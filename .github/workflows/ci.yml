@@ -58,6 +58,21 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build & Push API Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/api
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api:latest
+
+      - name: Build & Push Streamlit Image
+        if: success() && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/streamlit
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
 
       - name: Build & Push Airflow Image
         if: success() && github.ref == 'refs/heads/main'
@@ -74,26 +89,51 @@ jobs:
           context: ./services/mlflow
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlflow:latest
-
-      - name: Build & Push Streamlit Image
-        if: success() && github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v5
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
-          context: ./services/streamlit
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
+          terraform_version: 1.8.5
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
+      
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -var="prefix=stockanalytics" -var="dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}" -var="resource_group_name=stockanalytics-rg" -var="location=eastus"
+        working-directory: ./infra
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - name: Azure Login
-        if: success() && github.ref == 'refs/heads/main'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./infra
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      
+      - name: Terraform Output
+        run: |
+          echo "🌐 Streamlit App:"
+          terraform output -raw streamlit_fqdn
+        working-directory: ./infra
 
-      - name: Deploy to Azure Web App
-        if: success() && github.ref == 'refs/heads/main'
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          slot-name: 'production'
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
+      # - name: Azure Login
+      #   if: success() && github.ref == 'refs/heads/main'
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # - name: Deploy to Azure Web App
+      #   if: success() && github.ref == 'refs/heads/main'
+      #   uses: azure/webapps-deploy@v2
+      #   with:
+      #     app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+      #     slot-name: 'production'
+      #     images: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit:latest
   
