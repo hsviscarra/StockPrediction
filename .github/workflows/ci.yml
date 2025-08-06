@@ -100,13 +100,13 @@ jobs:
         working-directory: ./infra
       
       - name: Terraform Plan
-        run: | 
-          terraform plan -input=false -no-color -out=tfplan 
-            -var="prefix=stockanalytics" 
-            -var="dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}" 
-            -var="dockerhub_password=${{ secrets.DOCKERHUB_PASSWORD }}" 
-            -var="resource_group_name=stockanalytics-rg" 
-            -var="location=eastus" 
+        run: |
+          terraform plan -input=false -no-color -out=tfplan \
+            -var="prefix=stockanalytics" \
+            -var="dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}" \
+            -var="dockerhub_password=${{ secrets.DOCKERHUB_TOKEN }}" \
+            -var="resource_group_name=stockanalytics-rg" \
+            -var="location=eastus"
         working-directory: ./infra
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
@@ -115,7 +115,8 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: Terraform Apply
-        run: terraform apply -input=false -no-color -auto-approve tfplan
+        run: |
+          terraform apply -input=false -auto-approve tfplan
         working-directory: ./infra
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
